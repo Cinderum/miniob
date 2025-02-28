@@ -3,14 +3,17 @@ set(CMAKE_CXX_STANDARD 20)
 
 project(minidb)
 
+# 通过message输出项目的源目录和构建目录
 MESSAGE(STATUS "This is Project source dir " ${PROJECT_SOURCE_DIR})
 MESSAGE(STATUS "This is PROJECT_BINARY_DIR dir " ${PROJECT_BINARY_DIR})
 
+# 设置可执行文件的输出目录为构建目录下的bin文件夹
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+# 设了了cmake查找依赖库的路径
 SET(CMAKE_PREFIX_PATH "${PROJECT_SOURCE_DIR}/deps/3rd/usr/local;/usr/local;${CMAKE_PREFIX_PATH}")
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
-# 设置默认构建类型为 Debug
+# 设置默认构建类型为 Debug，并强制缓存该类型
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type:Default is debug" FORCE)
 endif()
@@ -19,6 +22,7 @@ string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 # 输出当前构建类型
 message(STATUS "Using build type: ${CMAKE_BUILD_TYPE}")
 
+# 定义了一系列构建选项
 OPTION(ENABLE_ASAN "Enable build with address sanitizer" ON)
 OPTION(ENABLE_TSAN "Build with thread sanitizer" OFF)
 OPTION(ENABLE_UBSAN "Build with undefined behavior sanitizer" OFF)
@@ -56,6 +60,7 @@ ENDIF(WIN32)
 
 # This is for clangd plugin for vscode
 # mute sign-compare error in lex/yacc
+# 设置通用的编译选项
 SET(CMAKE_COMMON_FLAGS "${CMAKE_COMMON_FLAGS} -Wall -Werror -Wno-error=sign-compare")
 IF ("${CMAKE_BUILD_TYPE_LOWER}" STREQUAL "debug")
     SET(CMAKE_COMMON_FLAGS "${CMAKE_COMMON_FLAGS} -DDEBUG -g -O0")

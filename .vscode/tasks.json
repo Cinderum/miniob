@@ -6,7 +6,10 @@
         {
             "label": "init",
             "type": "shell",
-            "command": "sudo -E env PATH=$PATH bash ${workspaceFolder}/build.sh init"
+            "command": "sudo -E env PATH=$PATH bash ${workspaceFolder}/build.sh init",
+            "problemMatcher": [
+                "$msCompile"
+            ]
         },
         {
             "label": "build_debug",

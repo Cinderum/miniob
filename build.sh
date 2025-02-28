@@ -2,21 +2,36 @@
 
 # readlink -f cannot work on mac
 TOPDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# 获取脚本所在的目录路径，并将其赋值给变量 TOPDIR
+# ${BASH_SOURCE[0]} 是当前脚本的文件名
+# dirname 获取文件所在的目录路径
+# cd 切换到该目录，pwd 获取当前工作目录的绝对路径
 
 BUILD_SH=$TOPDIR/build.sh
+# 将build.sh的目录赋值给变量BUILD_SH
 echo "THIRD_PARTY_INSTALL_PREFIX is ${THIRD_PARTY_INSTALL_PREFIX:=$TOPDIR/deps/3rd/usr/local}"
+# 输出 THIRD_PARTY_INSTALL_PREFIX 的值。如果该变量未设置，则使用默认值 $TOPDIR/deps/3rd/usr/local
 
 CMAKE_COMMAND="cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 --log-level=STATUS"
+# 定义一个 CMake 命令的基础字符串，包含 -DCMAKE_EXPORT_COMPILE_COMMANDS=1（生成编译命令数据库）和 --log-level=STATUS（设置日志级别为 STATUS）。
 CMAKE_COMMAND_THIRD_PARTY="$CMAKE_COMMAND -DCMAKE_INSTALL_PREFIX=$THIRD_PARTY_INSTALL_PREFIX"
+# 在基础 CMake 命令上添加 -DCMAKE_INSTALL_PREFIX 参数，指定第三方库的安装路径
 CMAKE_COMMAND_MINIOB="$CMAKE_COMMAND"
+# 将基础 CMake 命令赋值给 CMAKE_COMMAND_MINIOB，用于构建 MiniOB 项目。
 
 ALL_ARGS=("$@")
+# 将所有传递给脚本的参数存储在数组ALL_ARGS中
 BUILD_ARGS=()
+# 初始化一个空数组 BUILD_ARGS，用于存储构建相关的参数。
 MAKE_ARGS=()
+# 初始化一个空数组 MAKE_ARGS，用于存储 make 命令的参数。
 MAKE=make
+# 将 make 命令赋值给变量 MAKE
 
 echo "$0 ${ALL_ARGS[@]}"
+# 输出脚本的名称 ($0) 和所有传递给脚本的参数 (${ALL_ARGS[@]})。
 
+# 打印脚本的使用说明
 function usage
 {
   echo "Usage:"
@@ -38,6 +53,7 @@ function usage
   echo "./build.sh debug --make -j24"
 }
 
+# 解析传递给脚本的参数
 function parse_args
 {
   make_start=false
