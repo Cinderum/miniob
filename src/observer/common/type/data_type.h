@@ -27,12 +27,15 @@ class Value;
 class DataType
 {
 public:
+  // 防止隐式类型转换，只能显式构造这种数据类型
   explicit DataType(AttrType attr_type) : attr_type_(attr_type) {}
 
   virtual ~DataType() = default;
 
+  // 静态成员函数，属于类本身而不是类的实例，可以直接通过类名调用，不需要创建类的对象
   inline static DataType *type_instance(AttrType attr_type)
   {
+    // static_cast<int>(attr_type)将attr_type转换为int，作为索引，从type_instances_中找到对应的智能指针，获取其原始指针并返回
     return type_instances_.at(static_cast<int>(attr_type)).get();
   }
 

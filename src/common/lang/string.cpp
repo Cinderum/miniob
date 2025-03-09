@@ -283,4 +283,25 @@ string double_to_str(double v)
 
   return string(buf, len);
 }
+
+string date_to_str(int32_t date_values)
+{
+  std::stringstream ss;
+
+  int day = date_values % 100;
+  date_values /= 100;
+  int month = date_values % 100;
+  date_values /= 100;
+  int year = date_values;
+
+  // 使用 stringstream 格式化字符串
+  ss << std::setw(4) << std::setfill('0') << year << "-"  // 年
+      << std::setw(2) << std::setfill('0') << month << "-"  // 月
+      << std::setw(2) << std::setfill('0') << day;       // 日
+
+  // 获取格式化后的字符串
+  std::string date_string = ss.str();
+  return date_string;
+}
+
 }  // namespace common

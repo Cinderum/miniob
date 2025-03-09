@@ -32,6 +32,7 @@ public:
   friend class DataType;
   friend class IntegerType;
   friend class FloatType;
+  friend class DateType; 
   friend class BooleanType;
   friend class CharType;
   friend class VectorType;
@@ -46,6 +47,7 @@ public:
   explicit Value(float val);
   explicit Value(bool val);
   explicit Value(const char *s, int len = 0);
+  explicit Value(int32_t val, int num);
 
   Value(const Value &other);
   Value(Value &&other);
@@ -104,17 +106,21 @@ public:
   /**
    * 获取对应的值
    * 如果当前的类型与期望获取的类型不符，就会执行转换操作
+   * date不能进行转换
    */
   int    get_int() const;
   float  get_float() const;
   string get_string() const;
   bool   get_boolean() const;
+  int32_t get_date() const;
 
 private:
   void set_int(int val);
   void set_float(float val);
   void set_string(const char *s, int len = 0);
+  void set_date(int32_t date);
   void set_string_from_other(const Value &other);
+  int32_t string_to_date(char *data);
 
 private:
   AttrType attr_type_ = AttrType::UNDEFINED;
@@ -126,8 +132,9 @@ private:
     float   float_value_;
     bool    bool_value_;
     char   *pointer_value_;
+    int32_t date_value_;
   } value_ = {.int_value_ = 0};
 
-  /// 是否申请并占有内存, 目前对于 CHARS 类型 own_data_ 为true, 其余类型 own_data_ 为false
+  /// 是否申请并占有内存, 目前对于 CHARS 类型和 DATES类型 own_data_ 为true, 其余类型 own_data_ 为false
   bool own_data_ = false;
 };

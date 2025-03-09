@@ -14,11 +14,13 @@
 
 using namespace std;
 
+// 从sql_string中提取子字符串并返回
 string token_name(const char *sql_string, YYLTYPE *llocp)
 {
   return string(sql_string + llocp->first_column, llocp->last_column - llocp->first_column + 1);
 }
 
+// 处理语法分析过程中遇到的错误
 int yyerror(YYLTYPE *llocp, const char *sql_string, ParsedSqlResult *sql_result, yyscan_t scanner, const char *msg)
 {
   unique_ptr<ParsedSqlNode> error_sql_node = make_unique<ParsedSqlNode>(SCF_ERROR);
@@ -29,6 +31,7 @@ int yyerror(YYLTYPE *llocp, const char *sql_string, ParsedSqlResult *sql_result,
   return 0;
 }
 
+// 创建算术表达式节点
 ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
                                              Expression *left,
                                              Expression *right,
@@ -40,6 +43,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
   return expr;
 }
 
+// 设置聚合表达式节点
 UnboundAggregateExpr *create_aggregate_expression(const char *aggregate_name,
                                            Expression *child,
                                            const char *sql_string,
@@ -56,7 +60,7 @@ UnboundAggregateExpr *create_aggregate_expression(const char *aggregate_name,
 %define parse.error verbose
 /** 启用位置标识 **/
 %locations
-%lex-param { yyscan_t scanner }
+%lex-param { yyscan_t scanner } // 词法分析器的参数
 /** 这些定义了在yyparse函数中的参数 **/
 %parse-param { const char * sql_string }
 %parse-param { ParsedSqlResult * sql_result }
@@ -88,6 +92,7 @@ UnboundAggregateExpr *create_aggregate_expression(const char *aggregate_name,
         INT_T
         STRING_T
         FLOAT_T
+        DATE_T
         VECTOR_T
         HELP
         EXIT
@@ -114,30 +119,33 @@ UnboundAggregateExpr *create_aggregate_expression(const char *aggregate_name,
 
 /** union 中定义各种数据类型，真实生成的代码也是union类型，所以不能有非POD类型的数据 **/
 %union {
-  ParsedSqlNode *                            sql_node;
-  ConditionSqlNode *                         condition;
-  Value *                                    value;
-  enum CompOp                                comp;
-  RelAttrSqlNode *                           rel_attr;
-  vector<AttrInfoSqlNode> *             attr_infos;
-  AttrInfoSqlNode *                          attr_info;
-  Expression *                               expression;
-  vector<unique_ptr<Expression>> * expression_list;
-  vector<Value> *                       value_list;
-  vector<ConditionSqlNode> *            condition_list;
-  vector<RelAttrSqlNode> *              rel_attr_list;
-  vector<string> *                 relation_list;
-  char *                                     cstring;
-  int                                        number;
-  float                                      floats;
+  ParsedSqlNode *                            sql_node; // 一个sql节点，可能是查询、插入、更新等操作
+  ConditionSqlNode *                         condition; // 一个条件节点，如where子句中的条件
+  Value *                                    value; // 表示一个值节点
+  enum CompOp                                comp; // 表示一个比较操作符
+  RelAttrSqlNode *                           rel_attr; // 表示一个关系属性节点
+  vector<AttrInfoSqlNode> *             attr_infos; // 表示一个属性信息列表
+  AttrInfoSqlNode *                          attr_info; // 表示一个属性信息节点
+  Expression *                               expression; // 表示一个表达式节点
+  vector<unique_ptr<Expression>> * expression_list; // 表示一个表达式列表
+  vector<Value> *                       value_list; // 表示一个值列表
+  vector<ConditionSqlNode> *            condition_list; // 表示一个条件列表
+  vector<RelAttrSqlNode> *              rel_attr_list; // 表示一个关系属性列表
+  vector<string> *                 relation_list; // 表示一个关系列表
+  char *                                     cstring; // 表示一个C风格的字符串
+  int                                        number; // 表示一个整数值
+  float                                      floats; // 表示一个浮点数值
+  char *                                     dates; // 表示一个日期
 }
 
+// 终结符对应的语义值类型
 %token <number> NUMBER
 %token <floats> FLOAT
 %token <cstring> ID
-%token <cstring> SSS
-//非终结符
+%token <cstring> SSS // 字符串
+%token <dates> DATE
 
+//非终结符对应的语义值类型
 /** type 定义了各种解析后的结果输出的是什么类型。类型对应了 union 中的定义的成员变量名称 **/
 %type <number>              type
 %type <condition>           condition
@@ -180,11 +188,15 @@ UnboundAggregateExpr *create_aggregate_expression(const char *aggregate_name,
 // commands should be a list but I use a single command instead
 %type <sql_node>            commands
 
+// 定义运算符的优先级和结合性
 %left '+' '-'
 %left '*' '/'
 %nonassoc UMINUS
 %%
 
+// 语法规则部分
+
+// 语法解析的入口规则，创建sql语句的智能指针
 commands: command_wrapper opt_semicolon  //commands or sqls. parser starts here.
   {
     unique_ptr<ParsedSqlNode> sql_node = unique_ptr<ParsedSqlNode>($1);
@@ -351,6 +363,7 @@ type:
     | STRING_T { $$ = static_cast<int>(AttrType::CHARS); }
     | FLOAT_T  { $$ = static_cast<int>(AttrType::FLOATS); }
     | VECTOR_T { $$ = static_cast<int>(AttrType::VECTORS); }
+    | DATE_T   { $$ = static_cast<int>(AttrType::DATES); }
     ;
 insert_stmt:        /*insert   语句的语法解析树*/
     INSERT INTO ID VALUES LBRACE value value_list RBRACE 
@@ -395,6 +408,23 @@ value:
       char *tmp = common::substr($1,1,strlen($1)-2);
       $$ = new Value(tmp);
       free(tmp);
+    }
+    |DATE {
+      // 去掉首尾的引号
+      char *dateStr = common::substr($1, 1, strlen($1) - 2);
+      
+      // 将 YYYY-MM-DD 格式的字符串转换为 int32_t
+      int year, month, day;
+      sscanf(dateStr, "%d-%d-%d", &year, &month, &day);
+      
+      // 将日期转换为一个整数（例如：YYYYMMDD）
+      int32_t dateValue = year * 10000 + month * 100 + day;
+      
+      // 调用 Value 的构造函数
+      $$ = new Value(dateValue, 3);
+      
+      // 释放临时字符串的内存
+      free(dateStr);
     }
     ;
 storage_format:

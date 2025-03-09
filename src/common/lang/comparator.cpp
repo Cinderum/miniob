@@ -66,4 +66,17 @@ int compare_string(void *arg1, int arg1_max_length, void *arg2, int arg2_max_len
   return 0;
 }
 
+int compare_date(void *arg1, void *arg2)
+{
+  const int32_t date1 = *(const int32_t *)arg1;
+  const int32_t date2 = *(const int32_t *)arg2;
+  if (date1 > date2) {
+    return 1;
+  } else if (date1 < date2) {
+    return -1;
+  } else {
+    return 0;
+  }
+}
+
 }  // namespace common

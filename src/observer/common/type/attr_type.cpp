@@ -12,9 +12,9 @@ See the Mulan PSL v2 for more details. */
 #include "common/lang/string.h"
 #include "common/type/attr_type.h"
 
-const char *ATTR_TYPE_NAME[] = {"undefined", "chars", "ints", "floats", "vectors", "booleans"};
+const char *ATTR_TYPE_NAME[] = {"undefined", "chars", "ints", "floats", "dates", "vectors", "booleans"};
 
-const char *attr_type_to_string(AttrType type)
+const char *attr_type_to_string(AttrType type) 
 {
   if (type >= AttrType::UNDEFINED && type < AttrType::MAXTYPE) {
     return ATTR_TYPE_NAME[static_cast<int>(type)];

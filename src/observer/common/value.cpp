@@ -20,15 +20,17 @@ See the Mulan PSL v2 for more details. */
 #include "common/lang/string.h"
 #include "common/log/log.h"
 
-Value::Value(int val) { set_int(val); }
+Value::Value(int val) { set_int(val); } // integer类型
 
-Value::Value(float val) { set_float(val); }
+Value::Value(float val) { set_float(val); } // float类型
 
-Value::Value(bool val) { set_boolean(val); }
+Value::Value(bool val) { set_boolean(val); } // boolean类型
 
-Value::Value(const char *s, int len /*= 0*/) { set_string(s, len); }
+Value::Value(const char *s, int len /*= 0*/) { set_string(s, len); } // chars类型
 
-Value::Value(const Value &other)
+Value::Value(int32_t val, int num) { set_date(val); }
+
+Value::Value(const Value &other) // 拷贝构造函数
 {
   this->attr_type_ = other.attr_type_;
   this->length_    = other.length_;
@@ -44,7 +46,7 @@ Value::Value(const Value &other)
   }
 }
 
-Value::Value(Value &&other)
+Value::Value(Value &&other) // 移动构造函数
 {
   this->attr_type_ = other.attr_type_;
   this->length_    = other.length_;
@@ -110,6 +112,9 @@ void Value::reset()
 void Value::set_data(char *data, int length)
 {
   switch (attr_type_) {
+    case AttrType::DATES: {
+      set_date(string_to_date(data));
+    } break;
     case AttrType::CHARS: {
       set_string(data, length);
     } break;
@@ -175,6 +180,14 @@ void Value::set_string(const char *s, int len /*= 0*/)
   }
 }
 
+void Value::set_date(int32_t date)
+{
+  reset();
+  attr_type_ = AttrType::DATES;
+  value_.date_value_ = date;
+  length_ = sizeof(date);
+}
+
 void Value::set_value(const Value &value)
 {
   switch (value.attr_type_) {
@@ -190,6 +203,9 @@ void Value::set_value(const Value &value)
     case AttrType::BOOLEANS: {
       set_boolean(value.get_boolean());
     } break;
+    case AttrType::DATES: {
+      set_date(value.get_date());
+    } break;
     default: {
       ASSERT(false, "got an invalid value type");
     } break;
@@ -204,6 +220,14 @@ void Value::set_string_from_other(const Value &other)
     memcpy(this->value_.pointer_value_, other.value_.pointer_value_, this->length_);
     this->value_.pointer_value_[this->length_] = '\0';
   }
+}
+
+int32_t Value::string_to_date(char *data)
+{
+  // 直接提取年、月、日部分并拼接成整数
+  int year, month, day;
+  sscanf(data, "%d-%d-%d", &year, &month, &day); // 从字符串中解析年、月、日
+  return year * 10000 + month * 100 + day; // 拼接成 YYYYMMDD 格式的整数
 }
 
 const char *Value::data() const
@@ -241,16 +265,19 @@ int Value::get_int() const
         LOG_TRACE("failed to convert string to number. s=%s, ex=%s", value_.pointer_value_, ex.what());
         return 0;
       }
-    }
+    } break;
     case AttrType::INTS: {
       return value_.int_value_;
-    }
+    } break;
     case AttrType::FLOATS: {
       return (int)(value_.float_value_);
-    }
+    } break;
     case AttrType::BOOLEANS: {
       return (int)(value_.bool_value_);
-    }
+    } break;
+    case AttrType::DATES: {
+      return value_.date_value_;
+    } break;
     default: {
       LOG_WARN("unknown data type. type=%d", attr_type_);
       return 0;
@@ -278,6 +305,9 @@ float Value::get_float() const
     } break;
     case AttrType::BOOLEANS: {
       return float(value_.bool_value_);
+    } break;
+    case AttrType::DATES: {
+      return float(value_.date_value_);
     } break;
     default: {
       LOG_WARN("unknown data type. type=%d", attr_type_);
@@ -320,10 +350,37 @@ bool Value::get_boolean() const
     case AttrType::BOOLEANS: {
       return value_.bool_value_;
     } break;
+    case AttrType::DATES: {
+      return value_.date_value_ != 0;
+    } break;
     default: {
       LOG_WARN("unknown data type. type=%d", attr_type_);
       return false;
     }
   }
   return false;
+}
+
+int32_t Value::get_date() const 
+{
+  switch (attr_type_)
+  {
+  case AttrType::DATES: {
+    return value_.date_value_;
+  } break;
+  case AttrType::INTS: {
+    return value_.int_value_;
+  } break;
+  case AttrType::FLOATS: {
+    return (int)(value_.float_value_);
+  } break;
+  case AttrType::BOOLEANS: {
+    return (int)(value_.bool_value_);
+  } break;
+  default: {
+    LOG_WARN("unknown data type. type=%d", attr_type_);
+    return 0;
+  } break;
+  }
+  return 0;
 }
