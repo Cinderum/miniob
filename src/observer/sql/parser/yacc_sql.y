@@ -404,11 +404,6 @@ value:
       $$ = new Value((float)$1);
       @$ = @1;
     }
-    |SSS {
-      char *tmp = common::substr($1,1,strlen($1)-2);
-      $$ = new Value(tmp);
-      free(tmp);
-    }
     |DATE {
       // 去掉首尾的引号
       char *dateStr = common::substr($1, 1, strlen($1) - 2);
@@ -425,6 +420,11 @@ value:
       
       // 释放临时字符串的内存
       free(dateStr);
+    }
+    |SSS {
+      char *tmp = common::substr($1,1,strlen($1)-2);
+      $$ = new Value(tmp);
+      free(tmp);
     }
     ;
 storage_format:

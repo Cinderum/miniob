@@ -77,7 +77,6 @@ RC TableScanPhysicalOperator::filter(RowTuple &tuple, bool &result)
     if (rc != RC::SUCCESS) {
       return rc;
     }
-
     bool tmp_result = value.get_boolean();
     if (!tmp_result) {
       result = false;

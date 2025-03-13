@@ -111,14 +111,19 @@ void Value::reset()
 
 void Value::set_data(char *data, int length)
 {
+  // LOG_DEBUG("set_data");
+  // LOG_DEBUG("intdata: %d", *(int *)data);
   switch (attr_type_) {
     case AttrType::DATES: {
-      set_date(string_to_date(data));
+      // LOG_DEBUG("set_date");
+      int32_t date = *(int *)data;
+      set_date(date);
     } break;
     case AttrType::CHARS: {
       set_string(data, length);
     } break;
     case AttrType::INTS: {
+      // LOG_DEBUG("set_int");
       value_.int_value_ = *(int *)data;
       length_           = length;
     } break;

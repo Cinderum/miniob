@@ -60,6 +60,7 @@ RC DateType::set_value_from_str(Value &val, const string &data) const
   RC                rc = RC::SUCCESS;
   int year, month, day;  // 分配内存，存储年、月、日
   // 使用 sscanf 解析字符串
+  // LOG_INFO("set_value_from_str前!!!!!!!!%s!!!!!!!!", data);
   int ret = sscanf(data.c_str(), "%d-%d-%d", &year, &month, &day);
   if (ret != 3)
   {
@@ -86,7 +87,10 @@ RC DateType::set_value_from_str(Value &val, const string &data) const
   }
 
   int32_t date_values = year * 10000 + month * 100 + day;
+  
   val.set_date(date_values);
+
+  // LOG_INFO("set_value_from_str后!!!!!!!!%d!!!!!!!!", date_values);
 
   return rc;
 }
@@ -94,7 +98,9 @@ RC DateType::set_value_from_str(Value &val, const string &data) const
 RC DateType::to_string(const Value &val, string &result) const
 {
   stringstream ss;
+  // LOG_INFO("to_string前!!!!!!!!%d!!!!!!!!", val.value_.date_value_);
   ss << common::date_to_str(val.value_.date_value_);
   result = ss.str();
+  // LOG_INFO("to_string后!!!!!!!!%s!!!!!!!!", result);
   return RC::SUCCESS;
 }
