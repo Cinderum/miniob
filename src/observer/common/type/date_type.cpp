@@ -71,7 +71,7 @@ RC DateType::set_value_from_str(Value &val, const string &data) const
       || month < 1 || month > 12
       || day < 1 || day > 31)
   {
-    return rc = RC::INVALID_ARGUMENT;
+    return rc = RC::FAILURE;
   }
 
   int max_day_in_month[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
