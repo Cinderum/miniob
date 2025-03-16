@@ -18,6 +18,7 @@ See the Mulan PSL v2 for more details. */
 #include "common/sys/rc.h"
 #include "storage/db/db.h"
 #include "storage/table/table.h"
+#include "common/type/date_type.h"
 
 FilterStmt::~FilterStmt()
 {
@@ -105,6 +106,14 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, unordered_map<st
   } else {
     FilterObj filter_obj;
     filter_obj.init_value(condition.left_value);
+    if (filter_obj.value.attr_type() == AttrType::DATES)
+    {
+      DateType date;
+      if (!date.is_valid_date(filter_obj.value.get_date()))
+      {
+        return RC::INVALID_ARGUMENT;
+      }
+    }
     filter_unit->set_left(filter_obj);
   }
 
@@ -122,6 +131,14 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, unordered_map<st
   } else {
     FilterObj filter_obj;
     filter_obj.init_value(condition.right_value);
+    if (filter_obj.value.attr_type() == AttrType::DATES)
+    {
+      DateType date;
+      if (!date.is_valid_date(filter_obj.value.get_date()))
+      {
+        return RC::INVALID_ARGUMENT;
+      }
+    }
     filter_unit->set_right(filter_obj);
   }
 
