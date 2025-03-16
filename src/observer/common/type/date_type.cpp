@@ -64,8 +64,7 @@ bool DateType::is_valid_date(int32_t date)
   date /= 100;
   int year = date;
 
-  if (year < 1970 || (year > 2038 && month > 2)
-      || month < 1 || month > 12
+  if (month < 1 || month > 12
       || day < 1 || day > 31)
   {
     return false;
