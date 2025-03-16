@@ -38,6 +38,7 @@ RC FilterStmt::create(Db *db, Table *default_table, unordered_map<string, Table 
   for (int i = 0; i < condition_num; i++) {
     FilterUnit *filter_unit = nullptr;
 
+    LOG_DEBUG("即将进入create_filter_unit");
     rc = create_filter_unit(db, default_table, tables, conditions[i], filter_unit);
     if (rc != RC::SUCCESS) {
       delete tmp_stmt;

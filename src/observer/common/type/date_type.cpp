@@ -64,6 +64,7 @@ bool DateType::is_valid_date(int32_t date)
   date /= 100;
   int year = date;
 
+  LOG_DEBUG("month和day初步检测");
   if (month < 1 || month > 12
       || day < 1 || day > 31)
   {
@@ -72,15 +73,18 @@ bool DateType::is_valid_date(int32_t date)
 
   int max_day_in_month[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
   int max_day = max_day_in_month[month - 1];
-  if (!is_leap_year(year))
+  if (!is_leap_year(year) && month == 2)
   {
     max_day--;
   }
+
+  LOG_DEBUG("day = %d, max_day = %d\n", day, max_day);
 
   if (day > max_day)
   {
     return false;
   }
+
   return true;
 }
 
