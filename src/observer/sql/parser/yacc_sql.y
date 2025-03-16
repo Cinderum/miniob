@@ -11,6 +11,7 @@
 #include "sql/parser/yacc_sql.hpp"
 #include "sql/parser/lex_sql.h"
 #include "sql/expr/expression.h"
+#include "common/type/date_type.h"
 
 using namespace std;
 
@@ -408,15 +409,26 @@ value:
       // 去掉首尾的引号
       char *dateStr = common::substr($1, 1, strlen($1) - 2);
       
+      DateType date;
+      $$ = new Value;
+      RC rc = date.set_value_from_str(*$$, dateStr);
+      if (rc != RC::SUCCESS) {
+        LOG_DEBUG("检测到日期错误");
+        yyerror(&@$, sql_string, sql_result, scanner, "Date value out of range");
+        free(dateStr);
+        YYERROR;  // 终止解析
+      }
+      LOG_DEBUG("解析日期正常！");
+
       // 将 YYYY-MM-DD 格式的字符串转换为 int32_t
-      int year, month, day;
-      sscanf(dateStr, "%d-%d-%d", &year, &month, &day);
+      // int year, month, day;
+      // sscanf(dateStr, "%d-%d-%d", &year, &month, &day);
       
       // 将日期转换为一个整数（例如：YYYYMMDD）
-      int32_t dateValue = year * 10000 + month * 100 + day;
+      // int32_t dateValue = year * 10000 + month * 100 + day;
       
       // 调用 Value 的构造函数
-      $$ = new Value(dateValue, 3);
+      // $$ = new Value(dateValue, 3);
       
       // 释放临时字符串的内存
       free(dateStr);

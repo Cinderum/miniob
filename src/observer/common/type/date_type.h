@@ -24,5 +24,6 @@ public:
   RC set_value_from_str(Value &val, const string &data) const override;
 
   RC to_string(const Value &val, string &result) const override;
-  inline bool is_leap_year(const int &year) const;
+  static inline bool is_leap_year(const int &year);
+  static bool is_valid_date(int32_t date);
 };

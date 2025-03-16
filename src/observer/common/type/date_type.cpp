@@ -50,9 +50,38 @@ int DateType::compare(const Value &left, const Value &right) const
 //   return RC::SUCCESS;
 // }
 
-inline bool DateType::is_leap_year(const int &year) const
+inline bool DateType::is_leap_year(const int &year)
 {
   return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+}
+
+bool DateType::is_valid_date(int32_t date)
+{
+  int day = date % 100;
+  date /= 100;
+  int month = date % 100;
+  date /= 100;
+  int year = date;
+
+  if (year < 1970 || (year > 2038 && month > 2)
+      || month < 1 || month > 12
+      || day < 1 || day > 31)
+  {
+    return false;
+  }
+
+  int max_day_in_month[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+  int max_day = max_day_in_month[month - 1];
+  if (!is_leap_year(year))
+  {
+    max_day--;
+  }
+
+  if (day > max_day)
+  {
+    return false;
+  }
+  return true;
 }
 
 RC DateType::set_value_from_str(Value &val, const string &data) const
@@ -67,26 +96,12 @@ RC DateType::set_value_from_str(Value &val, const string &data) const
     return rc = RC::INVALID_ARGUMENT;
   }
 
-  if (year < 1970 || (year > 2038 && month > 2)
-      || month < 1 || month > 12
-      || day < 1 || day > 31)
-  {
-    return rc = RC::FAILURE;
-  }
-
-  int max_day_in_month[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-  int max_day = max_day_in_month[month - 1];
-  if (!is_leap_year(year))
-  {
-    max_day--;
-  }
-
-  if (day > max_day)
-  {
-    return rc = RC::INVALID_ARGUMENT;
-  }
-
   int32_t date_values = year * 10000 + month * 100 + day;
+
+  if (!is_valid_date(date_values))
+  {
+    return RC::INVALID_ARGUMENT;
+  }
   
   val.set_date(date_values);
 

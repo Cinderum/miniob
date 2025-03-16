@@ -19,6 +19,7 @@ See the Mulan PSL v2 for more details. */
 #include "common/lang/sstream.h"
 #include "common/lang/string.h"
 #include "common/log/log.h"
+#include "common/type/data_type.h"
 
 Value::Value(int val) { set_int(val); } // integer类型
 
@@ -28,7 +29,9 @@ Value::Value(bool val) { set_boolean(val); } // boolean类型
 
 Value::Value(const char *s, int len /*= 0*/) { set_string(s, len); } // chars类型
 
-Value::Value(int32_t val, int num) { set_date(val); }
+Value::Value(int32_t val, int num) {
+  set_date(val); 
+}
 
 Value::Value(const Value &other) // 拷贝构造函数
 {
