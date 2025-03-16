@@ -16,6 +16,8 @@ See the Mulan PSL v2 for more details. */
 #include "common/log/log.h"
 #include "storage/db/db.h"
 #include "storage/table/table.h"
+#include "common/value.h"
+#include "common/type/date_type.h"
 
 InsertStmt::InsertStmt(Table *table, const Value *values, int value_amount)
     : table_(table), values_(values), value_amount_(value_amount)
@@ -46,6 +48,20 @@ RC InsertStmt::create(Db *db, const InsertSqlNode &inserts, Stmt *&stmt)
     LOG_WARN("schema mismatch. value num=%d, field num in schema=%d", value_num, field_num);
     return RC::SCHEMA_FIELD_MISSING;
   }
+
+  for (size_t i = 0; i < inserts.values.size(); i++)
+  {
+    const Value &value = values[i];
+    if (value.attr_type() == AttrType::DATES)
+    {
+      DateType date;
+      if (!date.is_valid_date(value.get_date()))
+      {
+        return RC::INVALID_ARGUMENT;
+      }
+    }
+  }
+
 
   // everything alright
   stmt = new InsertStmt(table, values, value_num);

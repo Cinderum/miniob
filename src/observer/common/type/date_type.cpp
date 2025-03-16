@@ -57,6 +57,7 @@ inline bool DateType::is_leap_year(const int &year)
 
 bool DateType::is_valid_date(int32_t date)
 {
+  LOG_DEBUG("待检测日期为%d", date);
   int day = date % 100;
   date /= 100;
   int month = date % 100;
