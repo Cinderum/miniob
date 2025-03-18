@@ -53,7 +53,7 @@ int pattern_match(const char *str, const char *pattern, int str_len, int pattern
 
   while (i < str_len && j < pattern_len) {
     LOG_DEBUG("i = %d, j = %d", i, j);
-    LOG_DEBUG("%c, %c", str[i], pattern[j]);
+    LOG_DEBUG("%s, %s", str + i, pattern + j);
     if (pattern[j] == '%') {
       // 递归处理 % 匹配任意长度字符的情况
       while (j < pattern_len && pattern[j] == '%') {
@@ -106,17 +106,22 @@ int compare_string(void *arg1, int arg1_max_length, void *arg2, int arg2_max_len
       LOG_DEBUG("字符串匹配成功");
       return 2;
     }
-    LOG_DEBUG("字符串匹配失败");
-  }
+    else 
+    {
+      LOG_DEBUG("字符串匹配失败");
 
-  if (arg1_max_length > maxlen) {
-    return 1;
-  }
+      if (arg1_max_length > maxlen) {
+        return 1;
+      }
+    
+      if (arg2_max_length > maxlen) {
+        return -1;
+      }
 
-  if (arg2_max_length > maxlen) {
-    return -1;
+      return -2;
+    }
   }
-  LOG_DEBUG("字符串相等");
+  LOG_DEBUG("字符串匹配成功");
   return 0;
 }
 
