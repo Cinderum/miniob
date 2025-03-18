@@ -16,6 +16,7 @@ See the Mulan PSL v2 for more details. */
 #include <string.h>
 
 #include "common/lang/algorithm.h"
+#include "common/log/log.h"
 
 namespace common {
 
@@ -51,6 +52,8 @@ int pattern_match(const char *str, const char *pattern, int str_len, int pattern
   int i = 0, j = 0;
 
   while (i < str_len && j < pattern_len) {
+    LOG_DEBUG("i = %d, j = %d", i, j);
+    LOG_DEBUG("%c, %c", str[i], pattern[j]);
     if (pattern[j] == '%') {
       // 递归处理 % 匹配任意长度字符的情况
       while (j < pattern_len && pattern[j] == '%') {
@@ -78,6 +81,10 @@ int pattern_match(const char *str, const char *pattern, int str_len, int pattern
       return 0; // 匹配失败
     }
   }
+  if (i == str_len && j == pattern_len)
+  {
+    return 1;
+  }
   return 0;
 }
 
@@ -85,15 +92,21 @@ int compare_string(void *arg1, int arg1_max_length, void *arg2, int arg2_max_len
 {
   const char *s1     = (const char *)arg1;
   const char *s2     = (const char *)arg2;
+  
+  LOG_DEBUG("左字符串为%s", s1);
+  LOG_DEBUG("右字符串为%s", s2);
   int         maxlen = min(arg1_max_length, arg2_max_length);
   int         result = strncmp(s1, s2, maxlen); // 判断是否完全匹配
   if (0 != result) {
+    LOG_DEBUG("字符串不相等");
     result = result < 0 ? -1 : 1; 
     // 模式匹配
     if (pattern_match(s1, s2, arg1_max_length, arg2_max_length))
     {
+      LOG_DEBUG("字符串匹配成功");
       return 2;
     }
+    LOG_DEBUG("字符串匹配失败");
   }
 
   if (arg1_max_length > maxlen) {
@@ -103,6 +116,7 @@ int compare_string(void *arg1, int arg1_max_length, void *arg2, int arg2_max_len
   if (arg2_max_length > maxlen) {
     return -1;
   }
+  LOG_DEBUG("字符串相等");
   return 0;
 }
 
