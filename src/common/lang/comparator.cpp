@@ -81,11 +81,7 @@ int pattern_match(const char *str, const char *pattern, int str_len, int pattern
       return 0; // 匹配失败
     }
   }
-  if (i == str_len && j == pattern_len)
-  {
-    return 1;
-  }
-  return 0;
+  return 1;
 }
 
 int compare_string(void *arg1, int arg1_max_length, void *arg2, int arg2_max_length)
