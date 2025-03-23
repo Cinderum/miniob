@@ -87,8 +87,12 @@ RC ExpressionBinder::bind_expression(unique_ptr<Expression> &expr, vector<unique
     } break;
 
     case ExprType::AGGREGATION: {
-      ASSERT(false, "shouldn't be here");
+      return bind_aggregate_expression(expr, bound_expressions);
     } break;
+
+    // case ExprType::AGGREGATION: {
+    //   ASSERT(false, "shouldn't be here");
+    // } break;
 
     default: {
       LOG_WARN("unknown expression type: %d", static_cast<int>(expr->type()));

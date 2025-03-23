@@ -118,6 +118,11 @@ UnboundAggregateExpr *create_aggregate_expression(const char *aggregate_name,
         NE
         LIKE
         NL
+        MAX
+        MIN
+        COUNT
+        AVG
+        SUM
 
 /** union 中定义各种数据类型，真实生成的代码也是union类型，所以不能有非POD类型的数据 **/
 %union {
@@ -547,6 +552,21 @@ expression:
     }
     | '*' {
       $$ = new StarExpr();
+    }
+    | COUNT expression {
+      $$ = create_aggregate_expression("count", $2, sql_string, &@$);
+    }
+    | SUM expression {
+      $$ = create_aggregate_expression("sum", $2, sql_string, &@$);
+    }
+    | AVG expression {
+      $$ = create_aggregate_expression("avg", $2, sql_string, &@$);
+    }
+    | MAX expression {
+      $$ = create_aggregate_expression("max", $2, sql_string, &@$);
+    }
+    | MIN expression {
+      $$ = create_aggregate_expression("min", $2, sql_string, &@$);
     }
     // your code here
     ;
