@@ -581,6 +581,10 @@ expression:
     | expression COMMA expression {
       $$ = create_multi_expression($1, $3, sql_string, &@$);
     }
+    | LBRACE RBRACE {
+      $$ = create_multi_expression(nullptr, nullptr, sql_string, &@$);
+      $$->set_name(token_name(sql_string, &@$));
+    }
     // your code here
     ;
 
