@@ -90,6 +90,10 @@ RC ExpressionBinder::bind_expression(unique_ptr<Expression> &expr, vector<unique
       return bind_aggregate_expression(expr, bound_expressions);
     } break;
 
+    case ExprType::MultiIdExpr: {
+      return bind_multiid_expression(expr, bound_expressions);
+    } break;
+
     // case ExprType::AGGREGATION: {
     //   ASSERT(false, "shouldn't be here");
     // } break;
@@ -356,6 +360,11 @@ RC ExpressionBinder::bind_arithmetic_expression(
 
   bound_expressions.emplace_back(std::move(expr));
   return RC::SUCCESS;
+}
+
+RC ExpressionBinder::bind_multiid_expression(unique_ptr<Expression> &multiid_expr, vector<unique_ptr<Expression>> &bound_expressions)
+{
+  return RC::INVALID_ARGUMENT;
 }
 
 RC check_aggregate_expression(AggregateExpr &expression)

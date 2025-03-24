@@ -54,12 +54,11 @@ UnboundAggregateExpr *create_aggregate_expression(const char *aggregate_name,
   return expr;
 }
 
-MultiIdExpr *create_multi_expression (Expression *left,
-                                       Expression *right,
+MultiIdExpr *create_multi_expression (vector<unique_ptr<Expression>>* expressions,
                                        const char *sql_string,
                                        YYLTYPE *llocp)
 {
-  MultiIdExpr *expr = new MultiIdExpr(left, right);
+  MultiIdExpr *expr = new MultiIdExpr(expressions);
   expr->set_name(token_name(sql_string, llocp));
   return expr;
 }
@@ -578,11 +577,11 @@ expression:
     | MIN expression {
       $$ = create_aggregate_expression("min", $2, sql_string, &@$);
     }
-    | expression COMMA expression {
-      $$ = create_multi_expression($1, $3, sql_string, &@$);
+    | LBRACE expression_list RBRACE {
+      $$ = create_multi_expression($2, sql_string, &@$);
     }
     | LBRACE RBRACE {
-      $$ = create_multi_expression(nullptr, nullptr, sql_string, &@$);
+      $$ = create_multi_expression(nullptr, sql_string, &@$);
       $$->set_name(token_name(sql_string, &@$));
     }
     // your code here

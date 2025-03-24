@@ -472,12 +472,11 @@ private:
 class MultiIdExpr : public Expression
 {
 public:
-  MultiIdExpr(Expression *left, Expression *right);
+  MultiIdExpr(vector<unique_ptr<Expression>> *expressions);
   ExprType type() const override { return ExprType::MultiIdExpr; }
   AttrType value_type() const override { return AttrType::UNDEFINED; }
   RC get_value(const Tuple &tuple, Value &value) const override;
 
 private:
-  unique_ptr<Expression> left_;
-  unique_ptr<Expression> right_;
+  vector<unique_ptr<Expression>>* expressions_;
 };

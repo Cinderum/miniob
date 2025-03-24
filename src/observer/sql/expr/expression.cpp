@@ -607,8 +607,8 @@ RC AggregateExpr::type_from_string(const char *type_str, AggregateExpr::Type &ty
   return rc;
 }
 
-MultiIdExpr::MultiIdExpr(Expression *left, Expression *right) 
-    : left_(left), right_(right)
+MultiIdExpr::MultiIdExpr(vector<unique_ptr<Expression>> *expressions) 
+                        : expressions_(expressions)
 {}
 
 RC MultiIdExpr::get_value(const Tuple &tuple, Value &value) const
