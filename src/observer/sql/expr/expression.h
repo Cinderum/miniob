@@ -46,6 +46,7 @@ enum class ExprType
   CONJUNCTION,  ///< 多个表达式使用同一种关系(AND或OR)来联结
   ARITHMETIC,   ///< 算术运算
   AGGREGATION,  ///< 聚合运算
+  MultiIdExpr,  ///< 多参数
 };
 
 /**
@@ -466,4 +467,17 @@ public:
 private:
   Type                   aggregate_type_;
   unique_ptr<Expression> child_;
+};
+
+class MultiIdExpr : public Expression
+{
+public:
+  MultiIdExpr(Expression *left, Expression *right);
+  ExprType type() const override { return ExprType::MultiIdExpr; }
+  AttrType value_type() const override { return AttrType::UNDEFINED; }
+  RC get_value(const Tuple &tuple, Value &value) const override;
+
+private:
+  unique_ptr<Expression> left_;
+  unique_ptr<Expression> right_;
 };

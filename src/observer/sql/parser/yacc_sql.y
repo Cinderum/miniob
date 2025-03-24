@@ -54,6 +54,16 @@ UnboundAggregateExpr *create_aggregate_expression(const char *aggregate_name,
   return expr;
 }
 
+MultiIdExpr *create_multi_expression (Expression *left,
+                                       Expression *right,
+                                       const char *sql_string,
+                                       YYLTYPE *llocp)
+{
+  MultiIdExpr *expr = new MultiIdExpr(left, right);
+  expr->set_name(token_name(sql_string, llocp));
+  return expr;
+}
+
 %}
 
 %define api.pure full
@@ -567,6 +577,9 @@ expression:
     }
     | MIN expression {
       $$ = create_aggregate_expression("min", $2, sql_string, &@$);
+    }
+    | expression COMMA expression {
+      $$ = create_multi_expression($1, $3, sql_string, &@$);
     }
     // your code here
     ;

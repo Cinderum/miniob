@@ -606,3 +606,12 @@ RC AggregateExpr::type_from_string(const char *type_str, AggregateExpr::Type &ty
   }
   return rc;
 }
+
+MultiIdExpr::MultiIdExpr(Expression *left, Expression *right) 
+    : left_(left), right_(right)
+{}
+
+RC MultiIdExpr::get_value(const Tuple &tuple, Value &value) const
+{
+  return RC::INVALID_ARGUMENT;
+}
