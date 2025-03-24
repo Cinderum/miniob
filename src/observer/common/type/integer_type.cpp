@@ -88,3 +88,31 @@ RC IntegerType::divide(const Value &left, const Value &right, Value &result) con
   }
   return RC::SUCCESS;
 }
+
+int IntegerType::cast_cost(AttrType type)
+{
+  if (type == AttrType::INTS)
+  {
+    return 0;
+  }
+  else if (type == AttrType::FLOATS)
+  {
+    return 1;
+  }
+  return INT32_MAX;
+}
+
+RC IntegerType::cast_to(const Value &val, AttrType type, Value &result) const
+{
+  switch (type)
+  {
+  case AttrType::FLOATS:
+    result.set_float((float)(val.get_int()));
+    break;
+  
+  default:
+    return RC::UNIMPLEMENTED;
+    break;
+  }
+  return RC::SUCCESS;
+}
