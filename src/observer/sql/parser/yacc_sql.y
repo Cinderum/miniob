@@ -143,7 +143,7 @@ MultiIdExpr *create_multi_expression (vector<unique_ptr<Expression>>* expression
   vector<AttrInfoSqlNode> *             attr_infos; // 表示一个属性信息列表
   AttrInfoSqlNode *                          attr_info; // 表示一个属性信息节点
   Expression *                               expression; // 表示一个表达式节点
-  vector<unique_ptr<Expression>> * expression_list; // 表示一个表达式列表
+  vector<unique_ptr<Expression>> *           expression_list; // 表示一个表达式列表
   vector<Value> *                       value_list; // 表示一个值列表
   vector<ConditionSqlNode> *            condition_list; // 表示一个条件列表
   vector<RelAttrSqlNode> *              rel_attr_list; // 表示一个关系属性列表
@@ -208,6 +208,7 @@ MultiIdExpr *create_multi_expression (vector<unique_ptr<Expression>>* expression
 %left '+' '-'
 %left '*' '/'
 %nonassoc UMINUS
+%nonassoc MAX MIN AVG SUM COUNT
 %%
 
 // 语法规则部分
@@ -577,8 +578,8 @@ expression:
     | MIN expression {
       $$ = create_aggregate_expression("min", $2, sql_string, &@$);
     }
-    | LBRACE expression_list RBRACE {
-      $$ = create_multi_expression($2, sql_string, &@$);
+    | LBRACE expression COMMA expression_list RBRACE {
+      $$ = create_multi_expression($4, sql_string, &@$);
     }
     | LBRACE RBRACE {
       $$ = create_multi_expression(nullptr, sql_string, &@$);
