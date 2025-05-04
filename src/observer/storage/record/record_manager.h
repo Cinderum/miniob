@@ -146,6 +146,12 @@ public:
    */
   RC recover_init(DiskBufferPool &buffer_pool, PageNum page_num);
 
+
+  //新增的update函数，三个参数
+  RC update_record(const RID *rid, const FieldMeta *field_meta, Value &value);
+
+
+
   /**
    * @brief 对一个新的页面做初始化，初始化关于该页面记录信息的页头PageHeader
    *
@@ -378,6 +384,15 @@ public:
    * @param rid 待删除记录的标识符
    */
   RC delete_record(const RID *rid);
+
+  /**
+   * @brief 从指定文件中修改指定槽位的记录
+   * 
+   * @param rid 待修改记录的标识符
+   * @param field_meta 待修改字段的元数据
+   * @param field_meta 待修改值
+   */
+  RC update_record(const RID *rid, const FieldMeta* field_meta, Value &value);
 
   /**
    * @brief 插入一个新的记录到指定文件中，并返回该记录的标识符

@@ -14,6 +14,7 @@ See the Mulan PSL v2 for more details. */
 
 #pragma once
 
+#include <vector>
 #include "common/lang/vector.h"
 #include "storage/trx/trx.h"
 #include "storage/trx/mvcc_trx_log.h"
@@ -78,7 +79,7 @@ public:
 
   RC insert_record(Table *table, Record &record) override;
   RC delete_record(Table *table, Record &record) override;
-
+  RC update_record(Table *table, Record &record, Value &value, std::string &attribute_name) override;
   /**
    * @brief 当访问到某条数据时，使用此函数来判断是否可见，或者是否有访问冲突
    *

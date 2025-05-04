@@ -86,6 +86,7 @@ public:
   RC insert_record(Record &record);
   RC delete_record(const Record &record);
   RC delete_record(const RID &rid);
+  RC update_record(const Record &record, Value &value, std::string &attribute_name);
   RC get_record(const RID &rid, Record &record);
 
   RC recover_insert_record(Record &record);

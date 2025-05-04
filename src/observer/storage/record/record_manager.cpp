@@ -16,6 +16,7 @@ See the Mulan PSL v2 for more details. */
 #include "storage/common/condition_filter.h"
 #include "storage/trx/trx.h"
 #include "storage/clog/log_handler.h"
+#include "storage/clog/vacuous_log_handler.h"
 
 using namespace common;
 
@@ -250,6 +251,22 @@ RC RecordPageHandler::init_empty_page(DiskBufferPool &buffer_pool, LogHandler &l
 
   return RC::SUCCESS;
 }
+
+//新增一个update函数，三个参数
+RC RecordPageHandler::update_record(const RID *rid, const FieldMeta *field_meta, Value &value) {
+  ASSERT(rw_mode_ == ReadWriteMode::READ_WRITE, "cannot delete record from page while the page is readonly");
+  
+  if (rid->slot_num >= page_header_->record_capacity) {
+    LOG_ERROR("Invalid slot_num %d, exceed page's record capacity, page_num %d.", rid->slot_num, frame_->page_num());
+    return RC::INVALID_ARGUMENT;
+  }
+  // 需不需要加锁？
+  char *record_data = get_record_data(rid->slot_num);
+  //发生过内存溢出
+  memcpy(record_data + field_meta->offset(), value.data(), field_meta->len());
+  return RC::SUCCESS;
+}
+
 
 RC RecordPageHandler::cleanup()
 {
@@ -645,6 +662,20 @@ RC RecordFileHandler::delete_record(const RID *rid)
     LOG_TRACE("add free page %d to free page list", rid->page_num);
     lock_.unlock();
   }
+  return rc;
+}
+
+RC RecordFileHandler::update_record(const RID *rid, const FieldMeta *field_meta, Value &value) {
+  RC rc = RC::SUCCESS;
+  //按什么方式存储不确定
+  RecordPageHandler page_handler(StorageFormat::UNKNOWN_FORMAT);
+  VacuousLogHandler noop_log_handler;
+  if ((rc = page_handler.init(*disk_buffer_pool_, noop_log_handler,rid->page_num,ReadWriteMode::READ_WRITE)) != RC::SUCCESS) {
+    LOG_ERROR("Failed to init record page handler.page number=%d. rc=%s", rid->page_num, strrc(rc));
+    return rc;
+  }
+  rc = page_handler.update_record(rid, field_meta, value);
+  // page_handler.cleanup();
   return rc;
 }
 

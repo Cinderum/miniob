@@ -4,7 +4,7 @@
 #include "common/type/date_type.h"
 #include "common/value.h"
 #include "common/lang/limits.h"
-#include "common/value.h"
+
 
 int DateType::compare(const Value &left, const Value &right) const
 {

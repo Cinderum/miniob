@@ -509,6 +509,18 @@ RC Table::delete_record(const Record &record)
   return rc;
 }
 
+
+RC Table::update_record(const Record &record, Value &value, std::string &attribute_name) {
+  // 先从索引中删除当前值
+  RC rc = RC::SUCCESS;
+  delete_entry_of_indexes(record.data(), record.rid(), true);
+  const FieldMeta *field_meta = table_meta_.field(attribute_name.c_str());
+  rc = record_handler_->update_record(&record.rid(), field_meta, value);
+  // 再插入更新后的值
+  insert_entry_of_indexes(record.data(), record.rid());
+  return rc;
+}
+
 RC Table::insert_entry_of_indexes(const char *record, const RID &rid)
 {
   RC rc = RC::SUCCESS;

@@ -22,18 +22,21 @@ See the Mulan PSL v2 for more details. */
 #include "storage/trx/trx.h"
 #include "storage/trx/vacuous_trx.h"
 
+//事务工具包
 TrxKit *TrxKit::create(const char *name)
 {
   TrxKit *trx_kit = nullptr;
+  //如果没有名字或者名为真空，创建真空事务
   if (common::is_blank(name) || 0 == strcasecmp(name, "vacuous")) {
-    trx_kit = new VacuousTrxKit();
-  } else if (0 == strcasecmp(name, "mvcc")) {
+    trx_kit = new VacuousTrxKit();} 
+  //如果名为mvcc，创建mvcc事务
+  else if (0 == strcasecmp(name, "mvcc")) {
     trx_kit = new MvccTrxKit();
   } else {
     LOG_ERROR("unknown trx kit name. name=%s", name);
     return nullptr;
   }
-
+  //尝试初始化
   RC rc = trx_kit->init();
   if (OB_FAIL(rc)) {
     LOG_ERROR("failed to init trx kit. name=%s, rc=%s", name, strrc(rc));
