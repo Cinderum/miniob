@@ -130,12 +130,12 @@ RC Table::create(Db *db, int32_t table_id, const char *path, const char *name, c
 RC Table::drop(const char *path)
 {
   if (::remove(path) < 0) {
-    LOG_ERROR("fialed to delete table file. filename=%s, errmsg=%s", path, strerror(errno));
+    LOG_ERROR("Failed to delete table file. filename=%s, errmsg=%s", path, strerror(errno));
     return RC::INTERNAL;
   }
 
   RC rc = RC::SUCCESS;
-
+  //删除元文件
   string             data_file = table_data_file(base_dir_.c_str(), table_meta_.name());
   BufferPoolManager &bpm       = db_->buffer_pool_manager();
   rc                           = bpm.remove_file(data_file.c_str());
@@ -145,12 +145,12 @@ RC Table::drop(const char *path)
     LOG_ERROR("Failed to remove disk buffer pool of data file. file name=%s", data_file.c_str());
     return rc;
   }
-
+  //删除记录处理器
   if (record_handler_ != nullptr) {
     delete record_handler_;
     record_handler_ = nullptr;
   }
-
+  //删除索引
   for (auto &index : indexes_) {
     index -> destroy();
     delete index;
@@ -515,6 +515,7 @@ RC Table::update_record(const Record &record, Value &value, std::string &attribu
   RC rc = RC::SUCCESS;
   delete_entry_of_indexes(record.data(), record.rid(), true);
   const FieldMeta *field_meta = table_meta_.field(attribute_name.c_str());
+  //出现栈溢出
   rc = record_handler_->update_record(&record.rid(), field_meta, value);
   // 再插入更新后的值
   insert_entry_of_indexes(record.data(), record.rid());

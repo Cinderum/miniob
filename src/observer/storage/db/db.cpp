@@ -172,9 +172,10 @@ RC Db::drop_table(const char *table_name)
   string  table_file_path = table_meta_file(path_.c_str(), table_name);
   Table  *table           = find_table(table_name);
   if (table == nullptr) {
-    LOG_WARN("field to find table %s", table_name);
+    LOG_WARN("failed to find table %s", table_name);
     return RC::SCHEMA_TABLE_NOT_EXIST;
   }
+  //drop table的核心部分？
   rc = table->drop(table_file_path.c_str());
   if (rc != RC::SUCCESS) {
     LOG_ERROR("Failed to drop table %s.", table_name);

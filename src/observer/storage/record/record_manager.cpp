@@ -252,7 +252,7 @@ RC RecordPageHandler::init_empty_page(DiskBufferPool &buffer_pool, LogHandler &l
   return RC::SUCCESS;
 }
 
-//新增一个update函数，三个参数
+//新增一个update函数
 RC RecordPageHandler::update_record(const RID *rid, const FieldMeta *field_meta, Value &value) {
   ASSERT(rw_mode_ == ReadWriteMode::READ_WRITE, "cannot delete record from page while the page is readonly");
   
@@ -262,8 +262,9 @@ RC RecordPageHandler::update_record(const RID *rid, const FieldMeta *field_meta,
   }
   // 需不需要加锁？
   char *record_data = get_record_data(rid->slot_num);
-  //发生过内存溢出
-  memcpy(record_data + field_meta->offset(), value.data(), field_meta->len());
+  //出现栈溢出的主要原因，从value.data复制len字节到record_data + field_meta->offset()
+  size_t copy_len = std::min((size_t)value.length(), (size_t)field_meta->len());
+  memcpy(record_data + field_meta->offset(), value.data(), copy_len);
   return RC::SUCCESS;
 }
 
@@ -668,12 +669,14 @@ RC RecordFileHandler::delete_record(const RID *rid)
 RC RecordFileHandler::update_record(const RID *rid, const FieldMeta *field_meta, Value &value) {
   RC rc = RC::SUCCESS;
   //按什么方式存储不确定
-  RecordPageHandler page_handler(StorageFormat::UNKNOWN_FORMAT);
-  VacuousLogHandler noop_log_handler;
-  if ((rc = page_handler.init(*disk_buffer_pool_, noop_log_handler,rid->page_num,ReadWriteMode::READ_WRITE)) != RC::SUCCESS) {
+  RecordPageHandler page_handler(StorageFormat::ROW_FORMAT);
+  VacuousLogHandler vacuous_log_handler;
+  //出现读写锁冲突
+  if ((rc = page_handler.init(*disk_buffer_pool_, vacuous_log_handler,rid->page_num,ReadWriteMode::READ_WRITE)) != RC::SUCCESS) {
     LOG_ERROR("Failed to init record page handler.page number=%d. rc=%s", rid->page_num, strrc(rc));
     return rc;
   }
+  //出现栈溢出
   rc = page_handler.update_record(rid, field_meta, value);
   // page_handler.cleanup();
   return rc;

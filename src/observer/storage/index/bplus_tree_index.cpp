@@ -87,7 +87,7 @@ void BplusTreeIndex::destroy()
     index_handler_.destroy();
     inited_ = false;
   }
-  LOG_INFO("Successfully close index.");
+  LOG_INFO("Successfully destroy index.");
 }
 
 RC BplusTreeIndex::insert_entry(const char *record, const RID *rid)

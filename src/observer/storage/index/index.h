@@ -39,6 +39,7 @@ class Index
 public:
   Index()          = default;
   virtual ~Index() = default;
+  //删除索引的虚函数
   virtual void destroy() = 0;
 
   virtual RC create(Table *table, const char *file_name, const IndexMeta &index_meta, const FieldMeta &field_meta)
